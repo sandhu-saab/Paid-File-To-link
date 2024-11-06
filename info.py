@@ -13,7 +13,7 @@ BOT_TOKEN = environ.get('BOT_TOKEN', "")
 PORT = environ.get("PORT", "8080")
 
 # Online Stream and Download
-MULTI_CLIENT = False
+MULTI_CLIENT = True
 SLEEP_THRESHOLD = int(environ.get('SLEEP_THRESHOLD', '60'))
 PING_INTERVAL = int(environ.get("PING_INTERVAL", "1200"))  # 20 minutes
 if 'DYNO' in environ:
@@ -31,6 +31,6 @@ DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://rustomrustom128:NvLnTY
 DATABASE_NAME = environ.get('DATABASE_NAME', "techvjautobot")
 
 # Shortlink Info
-SHORTLINK = bool(environ.get('SHORTLINK', True)) # Set True Or False
-SHORTLINK_URL = environ.get('SHORTLINK_URL', 'http://setURL.in')
-SHORTLINK_API = environ.get('SHORTLINK_API', '7e609d0db7155014ae17d47582d1ffb073143a9e')
+SHORTLINK = bool(environ.get('SHORTLINK', False)) # Set True Or False
+SHORTLINK_URL = environ.get('SHORTLINK_URL', '')
+SHORTLINK_API = environ.get('SHORTLINK_API', '')
