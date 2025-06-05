@@ -1,13 +1,30 @@
 import asyncio
 import logging
+import threading
+from datetime import datetime
+
 from pyrogram import Client, idle
 from info import API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL
 from Script import script
 from utils import temp
-from datetime import datetime
 
+# FastAPI Web Server for Koyeb Health Check
+from fastapi import FastAPI
+import uvicorn
+
+web_app = FastAPI()
+
+@web_app.get("/")
+async def root():
+    return {"status": "ok"}  # Responds to health check
+
+def run_web():
+    uvicorn.run(web_app, host="0.0.0.0", port=8080)
+
+# Logging setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
+# Pyrogram Client with plugin support
 app = Client(
     "TechVJBot",
     api_id=API_ID,
@@ -18,8 +35,9 @@ app = Client(
 
 @app.on_message()
 async def startup_log(client, message):
-    pass
+    pass  # You can remove this or use for custom logs
 
+# Main bot function
 async def main():
     await app.start()
     me = await app.get_me()
@@ -28,12 +46,13 @@ async def main():
     await app.send_message(LOG_CHANNEL, script.RESTART_TXT.format(now.split()[0], now.split()[1]))
     logging.info("Bot started!")
 
-    await idle()  # ✅ Keeps the bot running and listening for events
+    await idle()  # Keeps the bot running
 
     await app.stop()
     logging.info("Bot stopped.")
 
+# Run bot and web server
 if __name__ == "__main__":
-    # ⚠️ This is the important fix 👇
+    threading.Thread(target=run_web).start()  # Start fake web server for Koyeb health check
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
