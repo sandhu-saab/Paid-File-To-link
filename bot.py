@@ -43,14 +43,19 @@ async def main():
     await app.start()
     me = await app.get_me()
     temp.BOT, temp.ME, temp.U_NAME, temp.B_NAME = app, me.id, me.username, me.first_name
+
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    await app.send_message(LOG_CHANNEL, script.RESTART_TXT.format(now.split()[0], now.split()[1]))
-    logging.info("Bot started!")
+    try:
+        await app.send_message(LOG_CHANNEL, script.RESTART_TXT.format(now.split()[0], now.split()[1]))
+    except Exception as e:
+        logging.warning(f"⚠️ Failed to send log to LOG_CHANNEL: {e}")
+
+    logging.info("✅ Bot started and running!")
 
     await idle()
 
     await app.stop()
-    logging.info("Bot stopped.")
+    logging.info("🛑 Bot stopped.")
 
 # Run bot and web server
 if __name__ == "__main__":
