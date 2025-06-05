@@ -2,29 +2,27 @@ import random
 import humanize
 from Script import script
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply, CallbackQuery
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from info import URL, LOG_CHANNEL, SHORTLINK
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
 from utils import temp, get_shortlink
+from premium import is_premium  # ✅ ADD THIS IMPORT
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    # Log new user if not in database
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
-    # Show update channel button
     rm = InlineKeyboardMarkup(
         [[
             InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")
         ]]
     )
 
-    # Show original start message
     await client.send_message(
         chat_id=message.from_user.id,
         text=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
@@ -32,24 +30,27 @@ async def start(client, message):
         parse_mode=enums.ParseMode.HTML
     )
 
-    # Show premium info message
     await message.reply_text(
         f"""👋 Welcome {message.from_user.first_name}!
 ⚠️ Only premium users can use this bot.
 💳 To check your plan or buy access, click /plan."""
     )
 
-
 @Client.on_message(filters.private & (filters.document | filters.video))
 async def stream_start(client, message):
+    user_id = message.from_user.id
+
+    # ✅ Check if user is premium
+    if not is_premium(user_id):
+        await message.reply_text("❌ You are not a premium user.\nUse /plan to buy access.")
+        return
+
     file = getattr(message, message.media.value)
     filename = file.file_name
-    filesize = humanize.naturalsize(file.file_size) 
+    filesize = humanize.naturalsize(file.file_size)
     fileid = file.file_id
-    user_id = message.from_user.id
     username = message.from_user.mention
 
-    # Send media to log channel
     log_msg = await client.send_cached_media(
         chat_id=LOG_CHANNEL,
         file_id=fileid,
@@ -57,15 +58,13 @@ async def stream_start(client, message):
 
     fileName = {quote_plus(get_name(log_msg))}
 
-    # Generate stream and download links
-    if SHORTLINK == False:
+    if not SHORTLINK:
         stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
         download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
     else:
         stream = await get_shortlink(f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}")
         download = await get_shortlink(f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}")
 
-    # Log reply message
     await log_msg.reply_text(
         text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
         quote=True,
@@ -78,7 +77,6 @@ async def stream_start(client, message):
         ])
     )
 
-    # User-facing reply
     rm = InlineKeyboardMarkup(
         [[
             InlineKeyboardButton("sᴛʀᴇᴀᴍ 🖥", url=stream),
