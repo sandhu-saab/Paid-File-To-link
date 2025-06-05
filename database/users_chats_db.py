@@ -11,8 +11,9 @@ class Database:
 
     def new_user(self, id, name):
         return dict(
-            id = id,
-            name = name,
+            id=id,
+            name=name,
+            last_use=None  # 🟡 Track last usage date
         )
     
     async def add_user(self, id, name):
@@ -20,7 +21,7 @@ class Database:
         await self.col.insert_one(user)
     
     async def is_user_exist(self, id):
-        user = await self.col.find_one({'id':int(id)})
+        user = await self.col.find_one({'id': int(id)})
         return bool(user)
     
     async def total_users_count(self):
@@ -32,5 +33,13 @@ class Database:
 
     async def delete_user(self, user_id):
         await self.col.delete_many({'id': int(user_id)})
+
+    # ✅ Functions for daily access limit for free users
+    async def get_last_use(self, user_id):
+        data = await self.col.find_one({'id': int(user_id)})
+        return data.get("last_use") if data else None
+
+    async def set_last_use(self, user_id, date_str):
+        await self.col.update_one({'id': int(user_id)}, {'$set': {'last_use': date_str}}, upsert=True)
 
 db = Database(DATABASE_URI, DATABASE_NAME)
