@@ -16,10 +16,10 @@ web_app = FastAPI()
 
 @web_app.get("/")
 async def root():
-    return {"status": "ok"}  # Responds to health check
+    return {"status": "ok"}  # Koyeb health check response
 
 def run_web():
-    uvicorn.run(web_app, host="0.0.0.0", port=8080)
+    uvicorn.run(web_app, host="0.0.0.0", port=8080, log_level="warning")
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -30,12 +30,13 @@ app = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    plugins=dict(root="plugins")  # ✅ Loads all plugin files like fsub.py, addpremium.py etc.
+    plugins=dict(root="plugins")
 )
 
+# Optional startup event log
 @app.on_message()
 async def startup_log(client, message):
-    pass  # You can remove this or use for custom logs
+    pass  # Remove or customize if needed
 
 # Main bot function
 async def main():
@@ -46,13 +47,13 @@ async def main():
     await app.send_message(LOG_CHANNEL, script.RESTART_TXT.format(now.split()[0], now.split()[1]))
     logging.info("Bot started!")
 
-    await idle()  # Keeps the bot running
+    await idle()
 
     await app.stop()
     logging.info("Bot stopped.")
 
 # Run bot and web server
 if __name__ == "__main__":
-    threading.Thread(target=run_web).start()  # Start fake web server for Koyeb health check
+    threading.Thread(target=run_web).start()  # Start health check web server
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
