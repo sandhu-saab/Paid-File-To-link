@@ -1,8 +1,12 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from premium import get_expiry
 
 @Client.on_message(filters.command("plan") & filters.private)
 async def plan(client, message):
+    user_id = message.from_user.id
+    expiry = get_expiry(user_id)
+
     qr_url = "https://telegra.ph/file/5cd4ef4be4cb84d678c9e.jpg"
     payment_link = "https://t.me/Sandymaiwait"
 
@@ -15,6 +19,7 @@ async def plan(client, message):
         "🟢 90 Days – ₹299\n"
         "🟢 1 Year – ₹599\n\n"
         "🎁 *Free Trial:* 1 use per day only\n\n"
+        f"📆 *Your Premium Expiry:* `{expiry}`\n\n"
         "📸 Scan QR or tap below to pay and send proof to admin."
     )
 
