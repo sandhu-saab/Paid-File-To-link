@@ -1,34 +1,39 @@
-import random
 import humanize
-from Script import script
+from datetime import datetime
+from urllib.parse import quote_plus
+
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from Script import script
 from info import URL, LOG_CHANNEL, SHORTLINK
-from urllib.parse import quote_plus
+from utils import temp, get_shortlink
+from premium import is_premium
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
-from utils import temp, get_shortlink
-from premium import is_premium
-from datetime import datetime
 
-@Client.on_message(filters.command("start") & filters.incoming)
+
+@Client.on_message(filters.command("start") & filters.private)
 async def start(client, message):
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
-        await client.send_message(
-            LOG_CHANNEL,
-            script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
-        )
+        try:
+            await client.send_message(
+                LOG_CHANNEL,
+                script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
+            )
+        except Exception as e:
+            print(f"[WARNING] Could not send log to LOG_CHANNEL: {e}")
 
-    rm = InlineKeyboardMarkup([
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")]
     ])
 
     await client.send_message(
         chat_id=message.from_user.id,
         text=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
-        reply_markup=rm,
+        reply_markup=keyboard,
         parse_mode=enums.ParseMode.HTML
     )
 
@@ -56,21 +61,16 @@ async def stream_start(client, message):
                     )
                     return
             except:
-                pass  # in case date parsing fails
+                pass  # in case of bad date format
 
         await db.set_last_use(user_id, now.strftime("%Y-%m-%d"))
 
     file = getattr(message, message.media.value)
-    filename = file.file_name or "Unnamed"
-    filesize = humanize.naturalsize(file.file_size)
     fileid = file.file_id
+    filename = file.file_name or "Unnamed"
     username = message.from_user.mention
 
-    log_msg = await client.send_cached_media(
-        chat_id=LOG_CHANNEL,
-        file_id=fileid,
-    )
-
+    log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=fileid)
     fileName = get_name(log_msg)
 
     if not SHORTLINK:
