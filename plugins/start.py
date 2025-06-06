@@ -10,19 +10,7 @@ from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
 from utils import temp, get_shortlink, is_premium
 from datetime import datetime
-from fsub import load_channels
-
-# 🔒 Force subscription check
-async def check_fsub(client, user_id):
-    channels = load_channels()
-    for ch in channels:
-        try:
-            member = await client.get_chat_member(ch, user_id)
-            if member.status not in ["member", "administrator", "creator"]:
-                return False
-        except:
-            return False
-    return True
+from fsub import check_fsub  # ✅ Import directly
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
