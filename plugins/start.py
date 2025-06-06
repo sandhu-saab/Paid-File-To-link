@@ -37,7 +37,7 @@ async def start(client, message):
 
     rm = InlineKeyboardMarkup([
         [InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")],
-        [InlineKeyboardButton("📜 View Plans", callback_data="show_plans")]
+        [InlineKeyboardButton("📜 View Plans", url="https://t.me/YourBotUsername?start=plan")]
     ])
 
     welcome_text = (
