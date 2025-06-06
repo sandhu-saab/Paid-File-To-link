@@ -1,5 +1,21 @@
 from pyrogram import Client, filters
-from pyrogram.types import CallbackQuery
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+
+@Client.on_message(filters.command("plan") & filters.private)
+async def show_plan_buttons(client, message: Message):
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🕐 1 Week ₹39", callback_data="plan_week"),
+         InlineKeyboardButton("📅 1 Month ₹69", callback_data="plan_month")],
+        [InlineKeyboardButton("📅 2 Months ₹149", callback_data="plan_2month"),
+         InlineKeyboardButton("📅 3 Months ₹199", callback_data="plan_3month")],
+        [InlineKeyboardButton("📆 1 Year ₹499", callback_data="plan_year")]
+    ])
+
+    await message.reply_text(
+        "💎 Choose a Premium Plan below to get unlimited access:",
+        reply_markup=buttons
+    )
+
 
 @Client.on_callback_query(filters.regex("plan_"))
 async def plan_buttons(_, query: CallbackQuery):
