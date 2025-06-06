@@ -42,7 +42,7 @@ async def set_fsub_channels(client, message):
 
     parts = message.text.split()
     if len(parts) < 2:
-        return await message.reply_text("❗ Usage:\n`/setfsub -1001234567890`", parse_mode="markdown")
+        return await message.reply_text("❗ Usage:\n`/setfsub -1002489054339`", parse_mode="markdown")
 
     try:
         channels = list(set(int(cid) for cid in parts[1:]))
