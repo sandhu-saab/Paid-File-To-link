@@ -2,7 +2,7 @@ import random
 import humanize
 from Script import script
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from info import URL, LOG_CHANNEL, SHORTLINK
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
@@ -11,7 +11,6 @@ from database.users_chats_db import db
 from utils import temp, get_shortlink, is_premium
 from datetime import datetime
 from .fsub import check_fsub
-
 
 # /start command
 @Client.on_message(filters.command("start") & filters.incoming)
@@ -56,7 +55,6 @@ async def start(client, message):
         [InlineKeyboardButton("📅 2 Months ₹149", callback_data="plan_2month"),
          InlineKeyboardButton("📅 3 Months ₹199", callback_data="plan_3month")],
         [InlineKeyboardButton("📆 1 Year ₹499", callback_data="plan_year")],
-        [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")],
         [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")]
     ])
 
@@ -66,6 +64,30 @@ async def start(client, message):
         reply_markup=rm,
         parse_mode=enums.ParseMode.HTML
     )
+
+
+# Callback for Premium Plan Buttons
+@Client.on_callback_query()
+async def premium_plan_callback(client, query: CallbackQuery):
+    user_id = query.from_user.id
+
+    qr_image_url = "https://telegra.ph/file/2e4a3cf0c1b29cdb54f4e.jpg"  # Replace with your QR image
+    qr_caption = (
+        "✅ Send this QR Code screenshot to @Sandymaiwait after payment.\n\n"
+        "📌 Don't forget to mention your username or forward this message.\n"
+        "💬 Contact Support: @Sandymaiwait"
+    )
+
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")]
+    ])
+
+    await query.message.reply_photo(
+        photo=qr_image_url,
+        caption=qr_caption,
+        reply_markup=buttons
+    )
+    await query.answer()
 
 
 # File upload handling
@@ -101,14 +123,12 @@ async def stream_start(client, message):
     )
 
     name = quote_plus(get_name(log_msg))
-    file_hash = get_hash(log_msg)
-
     if SHORTLINK:
-        stream = await get_shortlink(f"{URL}watch/{log_msg.id}/{name}?hash={file_hash}")
-        download = await get_shortlink(f"{URL}{log_msg.id}/{name}?hash={file_hash}")
+        stream = await get_shortlink(f"{URL}watch/{log_msg.id}/{name}?hash={get_hash(log_msg)}")
+        download = await get_shortlink(f"{URL}{log_msg.id}/{name}?hash={get_hash(log_msg)}")
     else:
-        stream = f"{URL}watch/{log_msg.id}/{name}?hash={file_hash}"
-        download = f"{URL}{log_msg.id}/{name}?hash={file_hash}"
+        stream = f"{URL}watch/{log_msg.id}/{name}?hash={get_hash(log_msg)}"
+        download = f"{URL}{log_msg.id}/{name}?hash={get_hash(log_msg)}"
 
     embed_code = f"<iframe src=\"{stream}\" width=\"100%\" height=\"500\" frameborder=\"0\" allowfullscreen></iframe>"
 
@@ -118,7 +138,7 @@ async def stream_start(client, message):
         disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🚀 Fast Download", url=download),
-             InlineKeyboardButton("🖥️ Watch Online", url=stream)]
+             InlineKeyboardButton('🖥️ Watch Online', url=stream)]
         ])
     )
 
