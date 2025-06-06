@@ -8,7 +8,7 @@ from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
-from utils import temp, get_shortlink
+from utils import temp, get_shortlink, is_premium
 from datetime import datetime
 
 @Client.on_message(filters.command("start") & filters.incoming)
@@ -17,98 +17,92 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
-    rm = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")
-        ],
-        [
-            InlineKeyboardButton("💎 Premium Plans", callback_data="plans")
-        ]]
+    rm = InlineKeyboardMarkup([
+        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")],
+        [InlineKeyboardButton("📜 View Plans", callback_data="show_plans")]
+    ])
+
+    welcome_text = (
+        f"<b>👋 Welcome {message.from_user.mention}!</b>\n\n"
+        f"This is an advanced <b>File to Direct Link Generator Bot</b>.\n\n"
+        f"<b>✨ Features:</b>\n"
+        f"1. 🔗 Generate Direct Download & Stream Links\n"
+        f"2. 🛡 Daily Free Usage Limit for Normal Users\n"
+        f"3. 💎 Premium Users Get Unlimited Access\n"
+        f"4. 🧾 Use /plan to View or Upgrade to Premium\n\n"
+        f"⚠️ Note: Free users can use this once per day.\n"
+        f"Use <b>/plan</b> to get unlimited access."
     )
-    
-    intro_text = f"""<b>👋 Hello {message.from_user.mention},</b>
-
-<b>🤖 Welcome to File to Stream Link Bot!</b>
-This bot allows you to generate direct download & stream links by simply sending any file.
-
-<b>🔰 Features:</b>
-1. 📁 Send a video/document & get direct link
-2. 🖥 Watch online or download in 1 click
-3. 🔒 Free users get 1 link per day
-4. 💎 Premium users get unlimited links
-
-💡 Use /plan to explore premium options.
-
-<b>Start by sending a file now!</b>"""
 
     await client.send_message(
         chat_id=message.from_user.id,
-        text=intro_text,
+        text=welcome_text,
         reply_markup=rm,
         parse_mode=enums.ParseMode.HTML
     )
-    return
-
 
 @Client.on_message(filters.private & (filters.document | filters.video))
 async def stream_start(client, message):
+    user_id = message.from_user.id
+    username = message.from_user.mention
+
+    # Check usage for free users
+    if not is_premium(user_id):
+        last_use = await db.get_last_use(user_id)
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        if last_use == today_str:
+            return await message.reply_text(
+                "⚠️ You have already used your daily limit.\n\n"
+                "💎 Upgrade to premium for unlimited access using /plan",
+                quote=True
+            )
+        await db.set_last_use(user_id, today_str)
+
     file = getattr(message, message.media.value)
     filename = file.file_name
-    filesize = humanize.naturalsize(file.file_size) 
+    filesize = humanize.naturalsize(file.file_size)
     fileid = file.file_id
-    user_id = message.from_user.id
-    username =  message.from_user.mention 
 
-    # 🧠 Check Premium Status (placeholder logic)
-    is_premium = False  # Set to True for premium users if needed
-
-    if not is_premium:
-        today_str = datetime.now().strftime("%Y-%m-%d")
-        last_use = await db.get_last_use(user_id)
-
-        if last_use == today_str:
-            btn = InlineKeyboardMarkup([
-                [InlineKeyboardButton("💎 Get Premium", callback_data="plans")]
-            ])
-            await message.reply_text(
-                "🚫 <b>You’ve already used your free limit today.</b>\n\n"
-                "💎 Upgrade to premium for unlimited link generation.\n"
-                "Use /plan to see options.",
-                reply_markup=btn,
-                parse_mode=enums.ParseMode.HTML
-            )
-            return
-        else:
-            await db.set_last_use(user_id, today_str)
-
-    # ✅ Proceed to generate link
     log_msg = await client.send_cached_media(
         chat_id=LOG_CHANNEL,
         file_id=fileid,
     )
-    fileName = {quote_plus(get_name(log_msg))}
-    if SHORTLINK == False:
-        stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-        download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+
+    name = quote_plus(get_name(log_msg))
+    if SHORTLINK:
+        stream = await get_shortlink(f"{URL}watch/{log_msg.id}/{name}?hash={get_hash(log_msg)}")
+        download = await get_shortlink(f"{URL}{log_msg.id}/{name}?hash={get_hash(log_msg)}")
     else:
-        stream = await get_shortlink(f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}")
-        download = await get_shortlink(f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}")
-        
+        stream = f"{URL}watch/{log_msg.id}/{name}?hash={get_hash(log_msg)}"
+        download = f"{URL}{log_msg.id}/{name}?hash={get_hash(log_msg)}"
+
     await log_msg.reply_text(
-        text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
+        text=f"🔗 Link generated for user ID #{user_id}\n👤 Username: {username}\n📄 File: {name}",
         quote=True,
         disable_web_page_preview=True,
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=download),
-                                            InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)]])
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🚀 Fast Download", url=download),
+             InlineKeyboardButton('🖥️ Watch Online', url=stream)]
+        ])
     )
-    rm=InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("sᴛʀᴇᴀᴍ 🖥", url=stream),
-                InlineKeyboardButton("ᴅᴏᴡɴʟᴏᴀᴅ 📥", url=download)
-            ]
-        ] 
-    )
-    msg_text = """<i><u>𝗬𝗼𝘂𝗿 𝗟𝗶𝗻𝗸 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱 !</u></i>\n\n<b>📂 Fɪʟᴇ ɴᴀᴍᴇ :</b> <i>{}</i>\n\n<b>📦 Fɪʟᴇ ꜱɪᴢᴇ :</b> <i>{}</i>\n\n<b>📥 Dᴏᴡɴʟᴏᴀᴅ :</b> <i>{}</i>\n\n<b>🖥 ᴡᴀᴛᴄʜ :</b> <i>{}</i>\n\n<b>🚸 Nᴏᴛᴇ : ʟɪɴᴋ ᴡᴏɴ'ᴛ ᴇxᴘɪʀᴇ ᴛɪʟʟ ɪ ᴅᴇʟᴇᴛᴇ</b>"""
 
-    await message.reply_text(text=msg_text.format(get_name(log_msg), humanbytes(get_media_file_size(message)), download, stream), quote=True, disable_web_page_preview=True, reply_markup=rm)
+    rm = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🖥 Stream", url=stream),
+         InlineKeyboardButton("📥 Download", url=download)]
+    ])
+
+    msg_text = (
+        f"<i><u>𝗬𝗼𝘂𝗿 𝗟𝗶𝗻𝗸 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱!</u></i>\n\n"
+        f"<b>📂 File Name:</b> <i>{get_name(log_msg)}</i>\n"
+        f"<b>📦 File Size:</b> <i>{humanbytes(get_media_file_size(message))}</i>\n\n"
+        f"<b>📥 Download:</b> <i>{download}</i>\n"
+        f"<b>🖥 Watch:</b> <i>{stream}</i>\n\n"
+        f"<b>🚸 Note:</b> Link will remain until the file is deleted."
+    )
+
+    await message.reply_text(
+        text=msg_text,
+        quote=True,
+        disable_web_page_preview=True,
+        reply_markup=rm
+    )
