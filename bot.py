@@ -17,6 +17,9 @@ from plugins import web_server
 from TechVJ.util.keepalive import ping_server
 from TechVJ.bot.clients import initialize_clients
 
+# ✅ Import your plan command/plugin file here
+import plugins.plan
+
 # Setup logging
 logging.config.fileConfig('logging.conf')
 logging.getLogger().setLevel(logging.INFO)
@@ -29,7 +32,7 @@ TechVJBot = Client(
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    plugins={"root": "plugins"}  # ✅ This enables all callback buttons
+    plugins={"root": "plugins"}  # ✅ This enables all plugin commands
 )
 
 async def start():
