@@ -4,7 +4,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 DB_FILE = "fsub_channels.json"
-OWNER_ID = 6046055058  # Replace this with your Telegram user ID
+OWNER_ID = 7459282233  # Replace this with your Telegram user ID
 
 # Load required channels
 def load_channels():
