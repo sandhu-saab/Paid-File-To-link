@@ -2,7 +2,7 @@ import random
 import humanize
 from Script import script
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply, CallbackQuery
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from info import URL, LOG_CHANNEL, SHORTLINK
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
@@ -10,9 +10,27 @@ from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
 from utils import temp, get_shortlink, is_premium
 from datetime import datetime
+from fsub import load_channels
+
+# 🔒 Force subscription check
+async def check_fsub(client, user_id):
+    channels = load_channels()
+    for ch in channels:
+        try:
+            member = await client.get_chat_member(ch, user_id)
+            if member.status not in ["member", "administrator", "creator"]:
+                return False
+        except:
+            return False
+    return True
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    if not await check_fsub(client, message.from_user.id):
+        return await message.reply_text(
+            "🔒 You must join the required channels before using this bot.\nSend /fsub to get the links."
+        )
+
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
@@ -46,7 +64,13 @@ async def stream_start(client, message):
     user_id = message.from_user.id
     username = message.from_user.mention
 
-    # Check usage for free users
+    # 🔒 Force subscription check
+    if not await check_fsub(client, user_id):
+        return await message.reply_text(
+            "🔒 You must join the required channels before using this bot.\nSend /fsub to get the links."
+        )
+
+    # ✅ Daily usage check
     if not is_premium(user_id):
         last_use = await db.get_last_use(user_id)
         today_str = datetime.now().strftime("%Y-%m-%d")
