@@ -3,7 +3,7 @@ from premium import set_premium
 from datetime import datetime, timedelta
 
 # ✅ Your Telegram ID
-ADMIN_ID = 6046055058
+ADMIN_ID = 7459282233
 
 @Client.on_message(filters.command("addpremium") & filters.private)
 async def add_premium_handler(client, message):
