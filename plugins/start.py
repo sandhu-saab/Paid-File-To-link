@@ -27,25 +27,41 @@ async def start(client, message):
             script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
         )
 
-    rm = InlineKeyboardMarkup([
-        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")],
-        [InlineKeyboardButton("📞 Contact Owner", url="https://t.me/Sandymaiwait")]
-    ])
-
-    welcome_text = (
+    text = (
         f"<b>👋 Welcome {message.from_user.mention}!</b>\n\n"
         f"This is an advanced <b>File to Direct Link Generator Bot</b>.\n\n"
         f"<b>✨ Features:</b>\n"
-        f"1. 🔗 Generate Direct Download & Stream Links\n"
-        f"2. 🛡 Daily Free Usage Limit for Normal Users\n"
-        f"3. 💎 Premium Users Get Unlimited Access\n"
-        f"4. 📞 Contact the owner to upgrade to premium\n\n"
-        f"⚠️ Note: Free users can use this once per day."
+        f"• 🔗 Direct Download & Streaming Links\n"
+        f"• 🛡 One Free Use per Day (Normal Users)\n"
+        f"• 💎 Unlimited Access for Premium Users\n"
+        f"• 📞 Contact owner to upgrade anytime\n\n"
+        f"⚠️ Note: Free users can use this bot once per day.\n\n"
+        f"<b>💎 Premium Plans:</b>\n"
+        f"Unlock premium for faster downloads, unlimited usage, and priority support!\n\n"
+        f"<b>📋 Plans:</b>\n"
+        f"1. 🆓 Free Trial — Once per day\n"
+        f"2. 🕐 1 Week — ₹39\n"
+        f"3. 📅 1 Month — ₹69\n"
+        f"4. 📅 2 Months — ₹149\n"
+        f"5. 📅 3 Months — ₹199\n"
+        f"6. 📆 1 Year — ₹499\n\n"
+        f"👉 To upgrade, choose a plan below and send payment screenshot to support.\n"
+        f"Your premium access will be activated shortly. ✅"
     )
+
+    rm = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🕐 1 Week ₹39", callback_data="plan_week"),
+         InlineKeyboardButton("📅 1 Month ₹69", callback_data="plan_month")],
+        [InlineKeyboardButton("📅 2 Months ₹149", callback_data="plan_2month"),
+         InlineKeyboardButton("📅 3 Months ₹199", callback_data="plan_3month")],
+        [InlineKeyboardButton("📆 1 Year ₹499", callback_data="plan_year")],
+        [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")],
+        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")]
+    ])
 
     await client.send_message(
         chat_id=message.from_user.id,
-        text=welcome_text,
+        text=text,
         reply_markup=rm,
         parse_mode=enums.ParseMode.HTML
     )
