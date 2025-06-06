@@ -17,6 +17,25 @@ def save_channels(channels):
     with open(DB_FILE, "w") as f:
         json.dump(channels, f)
 
+async def check_fsub(client, user_id):
+    """
+    ✅ This function is used in start.py to check if a user has joined the required channels.
+    Returns True if the user is subscribed, False otherwise.
+    """
+    required_channels = load_channels()
+    if not required_channels:
+        return True  # No channels to check
+
+    for ch in required_channels:
+        try:
+            member = await client.get_chat_member(ch, user_id)
+            if member.status not in ["member", "administrator", "creator"]:
+                return False
+        except:
+            return False
+    return True
+
+
 @Client.on_message(filters.command("setfsub") & filters.private)
 async def set_fsub_channels(client, message):
     if message.from_user.id != OWNER_ID:
@@ -33,6 +52,7 @@ async def set_fsub_channels(client, message):
     except Exception as e:
         return await message.reply_text(f"❌ Error:\n`{e}`", parse_mode="markdown")
 
+
 @Client.on_message(filters.command("delfsub") & filters.private)
 async def delete_fsub_channels(client, message):
     if message.from_user.id != OWNER_ID:
@@ -40,8 +60,12 @@ async def delete_fsub_channels(client, message):
     save_channels([])
     await message.reply_text("🗑️ All required channels have been removed.")
 
+
 @Client.on_message(filters.command("fsub") & filters.private)
-async def check_subscription(client, message):
+async def manual_check_fsub(client, message):
+    """
+    🔁 This is for users to manually check their subscription status and get join buttons.
+    """
     user_id = message.from_user.id
     required_channels = load_channels()
     not_joined = []
