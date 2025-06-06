@@ -66,31 +66,38 @@ async def start(client, message):
     )
 
 
-# Callback for Premium Plan Buttons
-@Client.on_callback_query()
-async def premium_plan_callback(client, query: CallbackQuery):
-    user_id = query.from_user.id
+# callback for plans
+@Client.on_callback_query(filters.regex("plan_"))
+async def send_qr_code(client, callback_query: CallbackQuery):
+    plan_map = {
+        "plan_week": "🕐 1 Week — ₹39",
+        "plan_month": "📅 1 Month — ₹69",
+        "plan_2month": "📅 2 Months — ₹149",
+        "plan_3month": "📅 3 Months — ₹199",
+        "plan_year": "📆 1 Year — ₹499"
+    }
 
-    qr_image_url = "https://telegra.ph/file/2e4a3cf0c1b29cdb54f4e.jpg"  # Replace with your QR image
-    qr_caption = (
-        "✅ Send this QR Code screenshot to @Sandymaiwait after payment.\n\n"
-        "📌 Don't forget to mention your username or forward this message.\n"
-        "💬 Contact Support: @Sandymaiwait"
+    plan_key = callback_query.data
+    plan_name = plan_map.get(plan_key, "Unknown Plan")
+
+    caption = (
+        f"💎 You selected: {plan_name}\n\n"
+        f"📌 Scan this QR Code to pay.\n"
+        f"✅ After payment, send screenshot to @Sandymaiwait\n\n"
+        f"💬 We will activate your plan shortly."
     )
 
-    buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")]
-    ])
-
-    await query.message.reply_photo(
-        photo=qr_image_url,
-        caption=qr_caption,
-        reply_markup=buttons
+    await callback_query.message.reply_photo(
+        photo="https://telegra.ph/file/e3b0e48b4a79010c20815.jpg",  # your QR image
+        caption=caption,
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")]
+        ])
     )
-    await query.answer()
+    await callback_query.answer()
 
 
-# File upload handling
+# file upload handling
 @Client.on_message(filters.private & (filters.document | filters.video))
 async def stream_start(client, message):
     user_id = message.from_user.id
