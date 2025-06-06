@@ -40,22 +40,22 @@ async def start(client, message):
         f"Unlock premium for faster downloads, unlimited usage, and priority support!\n\n"
         f"<b>📋 Plans:</b>\n"
         f"1. 🆓 Free Trial — Once per day\n"
-        f"2. 🕐 1 Week — ₹39\n"
-        f"3. 📅 1 Month — ₹69\n"
-        f"4. 📅 2 Months — ₹149\n"
-        f"5. 📅 3 Months — ₹199\n"
-        f"6. 📆 1 Year — ₹499\n\n"
+        f"2. 🕐 1 Week — ₹9\n"
+        f"3. 📅 1 Month — ₹19\n"
+        f"4. 📅 2 Months — ₹29\n"
+        f"5. 📅 3 Months — ₹49\n"
+        f"6. 📆 1 Year — ₹99\n\n"
         f"👉 To upgrade, choose a plan below and send payment screenshot to support.\n"
         f"Your premium access will be activated shortly. ✅"
     )
 
     rm = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🕐 1 Week ₹39", callback_data="plan_week"),
-         InlineKeyboardButton("📅 1 Month ₹69", callback_data="plan_month")],
-        [InlineKeyboardButton("📅 2 Months ₹149", callback_data="plan_2month"),
-         InlineKeyboardButton("📅 3 Months ₹199", callback_data="plan_3month")],
-        [InlineKeyboardButton("📆 1 Year ₹499", callback_data="plan_year")],
-        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")]
+        [InlineKeyboardButton("🕐 1 Week ₹9", callback_data="plan_week"),
+         InlineKeyboardButton("📅 1 Month ₹19", callback_data="plan_month")],
+        [InlineKeyboardButton("📅 2 Months ₹29", callback_data="plan_2month"),
+         InlineKeyboardButton("📅 3 Months ₹49", callback_data="plan_3month")],
+        [InlineKeyboardButton("📆 1 Year ₹99", callback_data="plan_year")],
+        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/movieupdatewithak01")]
     ])
 
     await client.send_message(
@@ -76,11 +76,11 @@ async def plan_command(client, message):
 @Client.on_callback_query(filters.regex("plan_"))
 async def send_qr_code(client, callback_query: CallbackQuery):
     plan_map = {
-        "plan_week": ("🕐 1 Week Plan", "₹39"),
-        "plan_month": ("📅 1 Month Plan", "₹69"),
-        "plan_2month": ("📅 2 Months Plan", "₹149"),
-        "plan_3month": ("📅 3 Months Plan", "₹199"),
-        "plan_year": ("📆 1 Year Plan", "₹499")
+        "plan_week": ("🕐 1 Week Plan", "₹9"),
+        "plan_month": ("📅 1 Month Plan", "₹19"),
+        "plan_2month": ("📅 2 Months Plan", "₹29"),
+        "plan_3month": ("📅 3 Months Plan", "₹49"),
+        "plan_year": ("📆 1 Year Plan", "₹99")
     }
 
     plan_key = callback_query.data
@@ -91,16 +91,16 @@ async def send_qr_code(client, callback_query: CallbackQuery):
         f"{plan_title}\n"
         f"💰 Price: {price}\n\n"
         f"📥 Scan this QR to pay\n"
-        f"📌 UPI ID: kingvj@ybl\n"
-        f"👤 Payee Name: VJ King\n\n"
-        f"📩 After payment, send screenshot to @Sandymaiwait"
+        f"📌 UPI ID: abhishek.0307-27@waicici\n"
+        f"👤 Payee Name: Abhishek Kumar\n\n"
+        f"📩 After payment, send screenshot to @Tv_serial_wala"
     )
 
     await callback_query.message.reply_photo(
         photo="https://graph.org/file/5635f6bd5f76da19ccc70-695af75bfa01aacbf2.jpg",
         caption=caption,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("📤 Send Screenshot", url="https://t.me/Sandymaiwait")]
+            [InlineKeyboardButton("📤 Send Screenshot", url="https://t.me/tv_serial_wala")]
         ])
     )
     await callback_query.answer()
@@ -123,7 +123,7 @@ async def stream_start(client, message):
         if last_use == today_str:
             return await message.reply_text(
                 "⚠️ You have already used your daily limit.\n\n"
-                "💎 Contact the owner to upgrade.",
+                "💎 Contact the owner to upgrade. or Send me again /start",
                 quote=True
             )
         await db.set_last_use(user_id, today_str)
@@ -165,11 +165,11 @@ async def stream_start(client, message):
     ])
 
     msg_text = (
-        f"<i><u>𝗬𝗼𝘂𝗿 𝗟𝗶𝗻𝗸 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱!</u></i>\n\n"
-        f"<b>📂 File Name:</b> <i>{get_name(log_msg)}</i>\n"
+        f"<i><u>𝐂𝐨𝐧𝐠𝐫𝐚𝐭𝐬 👏 𝐘𝐨𝐮𝐫 𝐋𝐢𝐧𝐤 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝!</u></i>\n\n"
+        f"<b>File :</b> <i>{get_name(log_msg)}</i>\n"
         f"<b>📦 File Size:</b> <i>{humanbytes(get_media_file_size(message))}</i>\n\n"
-        f"<b>📥 Download:</b> <i>{download}</i>\n"
-        f"<b>🖥 Watch:</b> <i>{stream}</i>\n\n"
+        f"<b>📥 Download Link👇:</b> <i>{download}</i>\n"
+        f"<b>🖥 Watch Link👇:</b> <i>{stream}</i>\n\n"
         f"<b>🌐 Embed Code:</b>\n<code>{embed_code}</code>\n\n"
         f"<b>🚸 Note:</b> Link will remain until the file is deleted."
     )
