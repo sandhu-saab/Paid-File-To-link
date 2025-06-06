@@ -39,13 +39,8 @@ async def start(client, message):
         f"<b>💎 Check Premium Plans: Send /plan</b>\n"      
     )
 
-    rm = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🕐 1 Week ₹9", callback_data="plan_week"),
-         InlineKeyboardButton("📅 1 Month ₹19", callback_data="plan_month")],
-        [InlineKeyboardButton("📅 2 Months ₹29", callback_data="plan_2month"),
-         InlineKeyboardButton("📅 3 Months ₹49", callback_data="plan_3month")],
-        [InlineKeyboardButton("📆 1 Year ₹99", callback_data="plan_year")],
-        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/movieupdatewithak01")]
+    rm = InlineKeyboardMarkup([,
+        [InlineKeyboardButton("✨ First Join Update Channel", url="https://t.me/movieupdatewithak01")]
     ])
 
     await client.send_message(
