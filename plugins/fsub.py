@@ -4,6 +4,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 DB_FILE = "fsub_channels.json"
+OWNER_ID = 6046055058  # ✅ Your Telegram user ID
 
 # Load channels from file
 def load_channels():
@@ -18,10 +19,10 @@ def save_channels(channels):
     with open(DB_FILE, "w") as f:
         json.dump(channels, f)
 
-# ✅ Owner command: /setfsub -100123 -100456
+# ✅ Set required channels (OWNER ONLY)
 @Client.on_message(filters.command("setfsub") & filters.private)
 async def set_fsub_channels(client, message):
-    if message.from_user.id != (await client.get_me()).id:
+    if message.from_user.id != OWNER_ID:
         return await message.reply_text("❌ Only the bot owner can set required channels.")
 
     parts = message.text.split()
@@ -35,8 +36,16 @@ async def set_fsub_channels(client, message):
     except Exception as e:
         return await message.reply_text(f"❌ Error:\n`{e}`", parse_mode="markdown")
 
+# 🧹 Delete all required channels (OWNER ONLY)
+@Client.on_message(filters.command("delfsub") & filters.private)
+async def delete_fsub_channels(client, message):
+    if message.from_user.id != OWNER_ID:
+        return await message.reply_text("❌ Only the bot owner can delete required channels.")
 
-# 🔍 User command: /fsub
+    save_channels([])  # clear the list
+    await message.reply_text("🗑️ All required channels have been removed.")
+
+# 🔍 Check if user joined all required channels
 @Client.on_message(filters.command("fsub") & filters.private)
 async def check_subscription(client, message):
     user_id = message.from_user.id
@@ -54,12 +63,12 @@ async def check_subscription(client, message):
     if not not_joined:
         return await message.reply_text("✅ You have joined all required channels.")
 
+    # Send join buttons
     buttons = []
     for ch in not_joined:
         try:
             invite_link = await client.export_chat_invite_link(ch)
-            chat_title = (await client.get_chat(ch)).title
-            buttons.append([InlineKeyboardButton(f"📢 {chat_title}", url=invite_link)])
+            buttons.append([InlineKeyboardButton("📢 Join Channel", url=invite_link)])
         except:
             continue
 
