@@ -27,8 +27,8 @@ async def start(client, message):
         )
 
     rm = InlineKeyboardMarkup([
-        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")],
-        [InlineKeyboardButton("📞 Contact Owner", url="https://t.me/YourUsername")]  # ← replace with your actual username
+        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")],
+        [InlineKeyboardButton("📞 Contact Owner", url="https://t.me/Sandymaiwait")]  # ← replace with your actual username
     ])
 
     welcome_text = (
