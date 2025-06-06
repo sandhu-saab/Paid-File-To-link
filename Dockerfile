@@ -4,16 +4,13 @@
 
 FROM python:3.10.8-slim-buster
 
-# System updates and install git
-RUN apt update && apt upgrade -y && apt install -y git
-
-# Install Python dependencies
+RUN apt update && apt upgrade -y
+RUN apt install git -y
 COPY requirements.txt /requirements.txt
-RUN pip3 install --upgrade pip && pip3 install -r /requirements.txt
 
-# Set working directory
+RUN cd /
+RUN pip3 install -U pip && pip3 install -U -r requirements.txt
+RUN mkdir /FileToLink
 WORKDIR /FileToLink
 COPY . /FileToLink
-
-# Start the bot
-CMD ["python3", "bot.py"]
+CMD ["python", "bot.py"]
