@@ -21,11 +21,14 @@ async def start(client, message):
 
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
-        await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
+        await client.send_message(
+            LOG_CHANNEL,
+            script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
+        )
 
     rm = InlineKeyboardMarkup([
         [InlineKeyboardButton("✨ Update Channel", url="https://t.me/vj_botz")],
-        [InlineKeyboardButton("📜 View Plans", url="https://t.me/YourBotUsername?start=plan")]
+        [InlineKeyboardButton("📞 Contact Owner", url="https://t.me/YourUsername")]  # ← replace with your actual username
     ])
 
     welcome_text = (
@@ -35,9 +38,8 @@ async def start(client, message):
         f"1. 🔗 Generate Direct Download & Stream Links\n"
         f"2. 🛡 Daily Free Usage Limit for Normal Users\n"
         f"3. 💎 Premium Users Get Unlimited Access\n"
-        f"4. 🧾 Use /plan to View or Upgrade to Premium\n\n"
-        f"⚠️ Note: Free users can use this once per day.\n"
-        f"Use <b>/plan</b> to get unlimited access."
+        f"4. 📞 Contact the owner to upgrade to premium\n\n"
+        f"⚠️ Note: Free users can use this once per day."
     )
 
     await client.send_message(
@@ -65,7 +67,7 @@ async def stream_start(client, message):
         if last_use == today_str:
             return await message.reply_text(
                 "⚠️ You have already used your daily limit.\n\n"
-                "💎 Upgrade to premium for unlimited access using /plan",
+                "💎 Contact the owner to upgrade.",
                 quote=True
             )
         await db.set_last_use(user_id, today_str)
