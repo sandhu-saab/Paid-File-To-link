@@ -10,7 +10,7 @@ from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
 from utils import temp, get_shortlink, is_premium
 from datetime import datetime
-from fsub import check_fsub  # ✅ Import directly
+from .fsub import check_fsub  # ✅ FIXED import
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
