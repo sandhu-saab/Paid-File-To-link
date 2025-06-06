@@ -1,5 +1,7 @@
 import random import humanize from Script import script from pyrogram import Client, filters, enums from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery from info import URL, LOG_CHANNEL, SHORTLINK from urllib.parse import quote_plus from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size from TechVJ.util.human_readable import humanbytes from database.users_chats_db import db from utils import temp, get_shortlink, is_premium from datetime import datetime from .fsub import check_fsub
 
+/start command
+
 @Client.on_message(filters.command("start") & filters.incoming) async def start(client, message): if not await check_fsub(client, message.from_user.id): return await message.reply_text( "🔒 You must join the required channels before using this bot.\nSend /fsub to get the links." )
 
 if not await db.is_user_exist(message.from_user.id):
@@ -48,19 +50,7 @@ await client.send_message(
     parse_mode=enums.ParseMode.HTML
 )
 
-@Client.on_callback_query(filters.regex("^plan_")) async def handle_plan_buttons(client, callback_query: CallbackQuery): plan_name = { "plan_week": "1 Week ₹39", "plan_month": "1 Month ₹69", "plan_2month": "2 Months ₹149", "plan_3month": "3 Months ₹199", "plan_year": "1 Year ₹499" }[callback_query.data]
-
-await callback_query.answer()
-await callback_query.message.reply_photo(
-    photo="https://telegra.ph/file/5e2c7ec6cf2d38cda1be6.jpg",  # sample QR
-    caption=f"💳 Plan Selected: <b>{plan_name}</b>\n\n"
-            f"✅ Please scan the QR code above or pay to UPI ID: <code>sandymaiwait@apl</code>.\n"
-            f"Then click below to send payment screenshot to admin.",
-    parse_mode=enums.ParseMode.HTML,
-    reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")]
-    ])
-)
+file upload handling
 
 @Client.on_message(filters.private & (filters.document | filters.video)) async def stream_start(client, message): user_id = message.from_user.id username = message.from_user.mention
 
@@ -132,3 +122,4 @@ await message.reply_text(
     disable_web_page_preview=True,
     reply_markup=rm
 )
+
