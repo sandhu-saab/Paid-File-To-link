@@ -66,6 +66,13 @@ async def start(client, message):
     )
 
 
+# ✅ /plan command will also show the same premium plans
+@Client.on_message(filters.command("plan") & filters.private)
+async def plan_command(client, message):
+    await start(client, message)
+
+
+# Callback query for buttons
 @Client.on_callback_query(filters.regex("plan_"))
 async def send_qr_code(client, callback_query: CallbackQuery):
     plan_map = {
@@ -99,6 +106,7 @@ async def send_qr_code(client, callback_query: CallbackQuery):
     await callback_query.answer()
 
 
+# Handle document or video upload
 @Client.on_message(filters.private & (filters.document | filters.video))
 async def stream_start(client, message):
     user_id = message.from_user.id
