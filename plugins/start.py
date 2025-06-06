@@ -89,7 +89,7 @@ async def stream_start(client, message):
         download = f"{URL}{log_msg.id}/{name}?hash={get_hash(log_msg)}"
 
     await log_msg.reply_text(
-        text=f"🔗 Link generated for user ID #{user_id}\n👤 Username: {username}\n📄 File: {name}",
+        text=f"🔗 Link generated for user ID #{user_id}\n👤 Username: {username}\n📄 File: {filename}",
         quote=True,
         disable_web_page_preview=True,
         reply_markup=InlineKeyboardMarkup([
