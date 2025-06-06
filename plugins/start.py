@@ -12,7 +12,7 @@ from utils import temp, get_shortlink, is_premium
 from datetime import datetime
 from .fsub import check_fsub
 
-# /start command
+
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if not await check_fsub(client, message.from_user.id):
@@ -66,38 +66,39 @@ async def start(client, message):
     )
 
 
-# callback for plans
 @Client.on_callback_query(filters.regex("plan_"))
 async def send_qr_code(client, callback_query: CallbackQuery):
     plan_map = {
-        "plan_week": "🕐 1 Week — ₹39",
-        "plan_month": "📅 1 Month — ₹69",
-        "plan_2month": "📅 2 Months — ₹149",
-        "plan_3month": "📅 3 Months — ₹199",
-        "plan_year": "📆 1 Year — ₹499"
+        "plan_week": ("🕐 1 Week Plan", "₹39"),
+        "plan_month": ("📅 1 Month Plan", "₹69"),
+        "plan_2month": ("📅 2 Months Plan", "₹149"),
+        "plan_3month": ("📅 3 Months Plan", "₹199"),
+        "plan_year": ("📆 1 Year Plan", "₹499")
     }
 
     plan_key = callback_query.data
-    plan_name = plan_map.get(plan_key, "Unknown Plan")
+    plan_info = plan_map.get(plan_key, ("❓ Unknown Plan", "N/A"))
+    plan_title, price = plan_info
 
     caption = (
-        f"💎 You selected: {plan_name}\n\n"
-        f"📌 Scan this QR Code to pay.\n"
-        f"✅ After payment, send screenshot to @Sandymaiwait\n\n"
-        f"💬 We will activate your plan shortly."
+        f"{plan_title}\n"
+        f"💰 Price: {price}\n\n"
+        f"📥 Scan this QR to pay\n"
+        f"📌 UPI ID: kingvj@ybl\n"
+        f"👤 Payee Name: VJ King\n\n"
+        f"📩 After payment, send screenshot to @Sandymaiwait"
     )
 
     await callback_query.message.reply_photo(
-        photo="https://telegra.ph/file/e3b0e48b4a79010c20815.jpg",  # your QR image
+        photo="https://graph.org/file/5635f6bd5f76da19ccc70-695af75bfa01aacbf2.jpg",
         caption=caption,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("📤 Send Payment Screenshot", url="https://t.me/Sandymaiwait")]
+            [InlineKeyboardButton("📤 Send Screenshot", url="https://t.me/Sandymaiwait")]
         ])
     )
     await callback_query.answer()
 
 
-# file upload handling
 @Client.on_message(filters.private & (filters.document | filters.video))
 async def stream_start(client, message):
     user_id = message.from_user.id
