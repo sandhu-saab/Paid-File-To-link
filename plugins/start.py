@@ -39,10 +39,7 @@ async def start(client, message):
         f"<b>💎 Check Premium Plans: Send /plan</b>\n"      
     )
 
-    rm = InlineKeyboardMarkup([
-       ("✨ First Join Update Channel", url="https://t.me/movieupdatewithak01")]
-    ])
-
+  
     await client.send_message(
         chat_id=message.from_user.id,
         text=text,
