@@ -18,15 +18,15 @@ def save_channels(channels):
     with open(DB_FILE, "w") as f:
         json.dump(channels, f)
 
-# /fsub command to set channels (OWNER ONLY)
-@Client.on_message(filters.command("fsub") & filters.private)
+# ✅ Owner command: /setfsub -100123 -100456
+@Client.on_message(filters.command("setfsub") & filters.private)
 async def set_fsub_channels(client, message):
-    if message.from_user.id != client.me.id:
+    if message.from_user.id != (await client.get_me()).id:
         return await message.reply_text("❌ Only the bot owner can set required channels.")
 
     parts = message.text.split()
     if len(parts) < 2:
-        return await message.reply_text("❗ Usage:\n`/fsub -1001234567890 -1009876543210`", parse_mode="markdown")
+        return await message.reply_text("❗ Usage:\n`/setfsub -1001234567890 -1009876543210`", parse_mode="markdown")
 
     try:
         channels = list(set(int(cid) for cid in parts[1:]))
@@ -35,7 +35,8 @@ async def set_fsub_channels(client, message):
     except Exception as e:
         return await message.reply_text(f"❌ Error:\n`{e}`", parse_mode="markdown")
 
-# Public command to check if user joined all channels
+
+# 🔍 User command: /fsub
 @Client.on_message(filters.command("fsub") & filters.private)
 async def check_subscription(client, message):
     user_id = message.from_user.id
@@ -53,12 +54,12 @@ async def check_subscription(client, message):
     if not not_joined:
         return await message.reply_text("✅ You have joined all required channels.")
 
-    # Send join buttons
     buttons = []
     for ch in not_joined:
         try:
             invite_link = await client.export_chat_invite_link(ch)
-            buttons.append([InlineKeyboardButton("📢 Join Channel", url=invite_link)])
+            chat_title = (await client.get_chat(ch)).title
+            buttons.append([InlineKeyboardButton(f"📢 {chat_title}", url=invite_link)])
         except:
             continue
 
