@@ -1,4 +1,4 @@
-pyrogram==2.0.106
+pyrofork
 tgcrypto
 aiohttp
 python-dotenv<=0.20.0
@@ -12,5 +12,3 @@ shortzy
 jinja2
 humanize
 pytz
-fastapi
-uvicorn
