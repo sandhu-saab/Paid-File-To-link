@@ -10,8 +10,9 @@ from TechVJ.util.human_readable import humanbytes
 from database.users_chats_db import db
 from utils import temp, get_shortlink, is_premium
 from datetime import datetime
-from .fsub import check_fsub  # ✅ FIXED import
+from .fsub import check_fsub
 
+# /start command
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if not await check_fsub(client, message.from_user.id):
@@ -28,7 +29,7 @@ async def start(client, message):
 
     rm = InlineKeyboardMarkup([
         [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")],
-        [InlineKeyboardButton("📞 Contact Owner", url="https://t.me/Sandymaiwait")]  # ← replace with your actual username
+        [InlineKeyboardButton("📞 Contact Owner", url="https://t.me/Sandymaiwait")]
     ])
 
     welcome_text = (
@@ -49,18 +50,17 @@ async def start(client, message):
         parse_mode=enums.ParseMode.HTML
     )
 
+# file upload handling
 @Client.on_message(filters.private & (filters.document | filters.video))
 async def stream_start(client, message):
     user_id = message.from_user.id
     username = message.from_user.mention
 
-    # 🔒 Force subscription check
     if not await check_fsub(client, user_id):
         return await message.reply_text(
             "🔒 You must join the required channels before using this bot.\nSend /fsub to get the links."
         )
 
-    # ✅ Daily usage check
     if not is_premium(user_id):
         last_use = await db.get_last_use(user_id)
         today_str = datetime.now().strftime("%Y-%m-%d")
@@ -120,3 +120,41 @@ async def stream_start(client, message):
         disable_web_page_preview=True,
         reply_markup=rm
     )
+
+
+# ✅ /plan command moved from plan.py to here
+@Client.on_message(filters.command("plan") & filters.private)
+async def show_plan(client, message):
+    await message.reply_photo(
+        photo="https://telegra.ph/file/66ac7485a5088c0871b13.jpg",
+        caption=(
+            "🪪 <b>ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs ♻️</b>\n\n"
+            "• 𝟷 ᴡᴇᴇᴋ   - ₹29\n"
+            "• 𝟷 ᴍᴏɴᴛʜ  - ₹59\n"
+            "• 𝟹 ᴍᴏɴᴛʜs - ₹249\n"
+            "• 𝟼 ᴍᴏɴᴛʜs - ₹499\n\n"
+            "•─────•─────────•─────•\n"
+            "<b>ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇs 🎁</b>\n\n"
+            "○ ᴅɪʀᴇᴄᴛ ꜰɪʟᴇs\n"
+            "○ ᴀᴅ-ꜰʀᴇᴇ ᴇxᴘᴇʀɪᴇɴᴄᴇ\n"
+            "○ ʜɪɢʜ-sᴘᴇᴇᴅ ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋ\n"
+            "○ ᴍᴜʟᴛɪ-ᴘʟᴀʏᴇʀ sᴛʀᴇᴀᴍɪɴɢ ʟɪɴᴋs\n"
+            "○ ᴜɴʟɪᴍɪᴛᴇᴅ ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ\n"
+            "○ ꜰᴜʟʟ ᴀᴅᴍɪɴ sᴜᴘᴘᴏʀᴛ\n"
+            "○ ʀᴇǫᴜᴇsᴛ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ɪɴ 𝟷ʜ\n"
+            "•─────•─────────•─────•\n\n"
+            "✨ <b>UPI ID:</b> <code>lamasandeep821@okicici</code>\n\n"
+            "💠 ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴ → /myplan\n\n"
+            "💢 <b>ᴍᴜsᴛ sᴇɴᴅ sᴄʀᴇᴇɴsʜᴏᴛ ᴀꜰᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ</b>\n"
+            "‼️ <i>ᴀꜰᴛᴇʀ sᴇɴᴅɪɴɢ ᴀ sᴄʀᴇᴇɴsʜᴏᴛ, ᴘʟᴇᴀsᴇ ɢɪᴠᴇ ᴍᴇ sᴏᴍᴇ ᴛɪᴍᴇ ᴛᴏ ᴀᴅᴅ ʏᴏᴜ ɪɴ ᴛʜᴇ ᴘʀᴇᴍɪᴜᴍ ᴠᴇʀsɪᴏɴ.</i>"
+        ),
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("📤 Send Screenshot", url="https://t.me/Sandymaiwait")],
+            [InlineKeyboardButton("❌ Close", callback_data="close_plan")]
+        ]),
+        parse_mode="html"
+    )
+
+@Client.on_callback_query(filters.regex("close_plan"))
+async def close_plan_callback(client, callback_query):
+    await callback_query.message.delete()
