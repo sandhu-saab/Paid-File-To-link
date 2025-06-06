@@ -1,64 +1,81 @@
-import asyncio
-import logging
-import threading
-from datetime import datetime
+# Don't Remove Credit @VJ_Botz
+# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
+# Ask Doubt on telegram @KingVJ01
 
-from pyrogram import Client, idle
-from info import API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL
-from Script import script
-from utils import temp
+# Clone Code Credit : YT - @Tech_VJ / TG - @VJ_Bots / GitHub - @VJBots
 
-# FastAPI Web Server for Koyeb Health Check
-from fastapi import FastAPI
-import uvicorn
+import sys, glob, importlib, logging, logging.config, pytz, asyncio
+from pathlib import Path
 
-web_app = FastAPI()
-
-@web_app.get("/")
-async def root():
-    return {"status": "ok"}  # Koyeb health check response
-
-def run_web():
-    uvicorn.run(web_app, host="0.0.0.0", port=8080, log_level="warning")
-
-# Logging setup
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-# Pyrogram Client with plugin support
-app = Client(
-    "TechVJBot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN,
-    plugins=dict(root="plugins")
+# Get logging configurations
+logging.config.fileConfig('logging.conf')
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("pyrogram").setLevel(logging.ERROR)
+logging.getLogger("imdbpy").setLevel(logging.ERROR)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
+logging.getLogger("aiohttp").setLevel(logging.ERROR)
+logging.getLogger("aiohttp.web").setLevel(logging.ERROR)
 
-# Optional startup event log
-@app.on_message()
-async def startup_log(client, message):
-    pass  # Remove or customize if needed
+from pyrogram import Client, idle 
+from database.users_chats_db import db
+from info import *
+from utils import temp
+from typing import Union, Optional, AsyncGenerator
+from Script import script 
+from datetime import date, datetime 
+from aiohttp import web
+from plugins import web_server
 
-# Main bot function
-async def main():
-    await app.start()
-    me = await app.get_me()
-    temp.BOT, temp.ME, temp.U_NAME, temp.B_NAME = app, me.id, me.username, me.first_name
+from TechVJ.bot import TechVJBot
+from TechVJ.util.keepalive import ping_server
+from TechVJ.bot.clients import initialize_clients
 
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    try:
-        await app.send_message(LOG_CHANNEL, script.RESTART_TXT.format(now.split()[0], now.split()[1]))
-    except Exception as e:
-        logging.warning(f"⚠️ Failed to send log to LOG_CHANNEL: {e}")
+ppath = "plugins/*.py"
+files = glob.glob(ppath)
+TechVJBot.start()
+loop = asyncio.get_event_loop()
 
-    logging.info("✅ Bot started and running!")
 
+async def start():
+    print('\n')
+    print('Initalizing Your Bot')
+    bot_info = await TechVJBot.get_me()
+    await initialize_clients()
+    for name in files:
+        with open(name) as a:
+            patt = Path(a.name)
+            plugin_name = patt.stem.replace(".py", "")
+            plugins_dir = Path(f"plugins/{plugin_name}.py")
+            import_path = "plugins.{}".format(plugin_name)
+            spec = importlib.util.spec_from_file_location(import_path, plugins_dir)
+            load = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(load)
+            sys.modules["plugins." + plugin_name] = load
+            print("Tech VJ Imported => " + plugin_name)
+    if ON_HEROKU:
+        asyncio.create_task(ping_server())
+    me = await TechVJBot.get_me()
+    temp.BOT = TechVJBot
+    temp.ME = me.id
+    temp.U_NAME = me.username
+    temp.B_NAME = me.first_name
+    tz = pytz.timezone('Asia/Kolkata')
+    today = date.today()
+    now = datetime.now(tz)
+    time = now.strftime("%H:%M:%S %p")
+    await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
+    app = web.AppRunner(await web_server())
+    await app.setup()
+    bind_address = "0.0.0.0"
+    await web.TCPSite(app, bind_address, PORT).start()
     await idle()
 
-    await app.stop()
-    logging.info("🛑 Bot stopped.")
 
-# Run bot and web server
-if __name__ == "__main__":
-    threading.Thread(target=run_web).start()  # Start health check web server
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+if __name__ == '__main__':
+    try:
+        loop.run_until_complete(start())
+    except KeyboardInterrupt:
+        logging.info('Service Stopped Bye 👋')
