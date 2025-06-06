@@ -29,7 +29,7 @@ async def myplan(client, message):
             "Use /plan to upgrade now 🔥"
         )
         btn = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("📜 View Plans", url="https://t.me/Sandymaiwait")]]
+            [[InlineKeyboardButton("📜 View Plans", url="https://t.me/Tv_serial_wala")]]
         )
         await message.reply_text(
             text=text,
