@@ -30,7 +30,13 @@ async def start(client, message):
     text = (
         f"<b>👋 Welcome {message.from_user.mention}!</b>\n\n"
         f"This is an advanced <b>File to Direct Link Generator Bot</b>.\n\n"
-        
+ f"<b>✨ Our Bot Features: 👇</b>\n"
+        f"• 🔗 Direct Download & Streaming Links\n"
+        f"• 🛡 One Free Use per Day (Normal Users)\n"
+        f"• 💎 Unlimited Access for Premium Users\n"
+        f"• 📞 Contact owner to upgrade anytime\n\n"
+        f"⚠️ Note: Free users can use this bot once per day.\n\n"
+        f"<b>💎 Check Premium Plans: Send /plan</b>\n"      
     )
 
     rm = InlineKeyboardMarkup([
