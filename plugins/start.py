@@ -37,6 +37,24 @@ async def start(client, message):
         f"• 📞 Contact owner to upgrade anytime\n\n"
         f"⚠️ Note: Free users can use this bot once per day.\n\n"
         f"<b>💎 Check Premium Plans: Send /plan</b>\n"
+ 
+)
+
+    rm = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🕐 1 Week ₹9", callback_data="plan_week"),
+         InlineKeyboardButton("📅 1 Month ₹19", callback_data="plan_month")],
+        [InlineKeyboardButton("📅 2 Months ₹29", callback_data="plan_2month"),
+         InlineKeyboardButton("📅 3 Months ₹49", callback_data="plan_3month")],
+        [InlineKeyboardButton("📆 1 Year ₹99", callback_data="plan_year")],
+        [InlineKeyboardButton("✨ Update Channel", url="https://t.me/+DiOcxJnNQXdmNDdl")]
+    ])
+
+    await client.send_message(
+        chat_id=message.from_user.id,
+        text=text,
+        reply_markup=rm,
+        parse_mode=enums.ParseMode.HTML
+    )
 
 # ✅ /plan command will also show the same premium plans
 @Client.on_message(filters.command("plan") & filters.private)
