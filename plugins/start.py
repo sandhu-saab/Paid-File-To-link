@@ -36,17 +36,7 @@ async def start(client, message):
         f"• 💎 Unlimited Access for Premium Users\n"
         f"• 📞 Contact owner to upgrade anytime\n\n"
         f"⚠️ Note: Free users can use this bot once per day.\n\n"
-        f"<b>💎 Check Premium Plans: Send /plan</b>\n"      
-    )
-
-  
-    await client.send_message(
-        chat_id=message.from_user.id,
-        text=text,
-        reply_markup=rm,
-        parse_mode=enums.ParseMode.HTML
-    )
-
+        f"<b>💎 Check Premium Plans: Send /plan</b>\n"
 
 # ✅ /plan command will also show the same premium plans
 @Client.on_message(filters.command("plan") & filters.private)
